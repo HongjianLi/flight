@@ -1,0 +1,60 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>flights</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.8/dist/darkly/bootstrap.min.css" integrity="sha256-qK2XNHPC0d04vpmQHEb050dDEerz1tPtEEZiwzH9PFA=" crossorigin="anonymous">
+</head>
+<body>
+	<section id="table-container">
+		<table class="table table-dark table-hover">
+			<thead style="position:sticky; top:0px;">
+				<tr>
+					<th scope="col">date</th>
+					<th scope="col">time</th>
+					<th scope="col">no</th>
+					<th scope="col">carrier</th>
+					<th scope="col">srcTime</th>
+					<th scope="col">srcPort</th>
+					<th scope="col">duration</th>
+					<th scope="col">dstTime</th>
+					<th scope="col">dstPort</th>
+					<th scope="col">price</th>
+					<th scope="col">discount</th>
+				</tr>
+			</thead>
+			<tbody id="tbody">
+			</tbody>
+		</table>
+	</section>
+	<script type="module">
+document.addEventListener('DOMContentLoaded', async () => {
+	const urlParams = new URLSearchParams(window.location.search);
+	const date = urlParams.get('date');
+	const srcCity = urlParams.get('srcCity');
+	const dstCity = urlParams.get('dstCity');
+	const response = await fetch(`${date}-${srcCity}-${dstCity}.tsv`);
+	console.assert(response.ok);
+	const rows = (await response.text()).split('\n').slice(0, -1).map(line => line.split('	')); // The last row is an empty line.
+	const tbody = document.getElementById('tbody');
+	const lowestPrice = {};
+	rows.forEach(row => {
+		const tr = document.createElement('tr');
+		row.forEach((col, idx) => {
+			const td = document.createElement('td');
+			const text = document.createTextNode(col);
+			td.appendChild(text);
+			tr.appendChild(td);
+		});
+		const no = row[2];
+		const price = row[9];
+		if (!lowestPrice[no] || price < lowestPrice[no]) {
+			lowestPrice[no] = price; // Save the lowest price.
+			tr.classList.add('table-primary');
+		}
+		tbody.appendChild(tr);
+	});
+});
+	</script>
+</body>
+</html>
