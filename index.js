@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 import fs from 'fs/promises';
 import puppeteer from 'puppeteer-core';
+const dsdArr = await fs.readFile('index.json').then(JSON.parse);
+console.log(`Found ${dsdArr.length} { date, srcCity, dstCity } to search`);
+if (!dsdArr.length) process.exit();
+const city2code = await fs.readFile('airportsCityCode.json').then(JSON.parse);
 const now = new Date();
 const dateStr = now.toLocaleDateString('en-CA'); // This locale outputs date as yyyy-mm-dd
 const timeStr = now.toLocaleTimeString('zh-CN'); // This locale outputs time as HH:MM:SS
-const [ dsdArr, city2code ] = await Promise.all(['index.json', 'airportsCityCode.json'].map(p => fs.readFile(p).then(JSON.parse)));
 const browser = await puppeteer.launch({
 	defaultViewport: { width: 1280, height: 2160 },
 	executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
